@@ -3,7 +3,7 @@
     "Author": "The Combat Reborn Team (fork by IndividualGather)",
     "Name": "RotationSolverRebornButBetter",
     "InternalName": "RotationSolver",
-    "AssemblyVersion": "7.5.7.604",
+    "AssemblyVersion": "7.5.7.704",
     "Description": "An unofficial fork of Rotation Solver Reborn by The Combat Reborn Team: https://github.com/FFXIV-CombatReborn/RotationSolverReborn\nAll credit for the plugin goes to the original authors.\n\nWhy this fork exists: the official plugin only runs the rotations built into it. This fork adds a single feature: it also loads rotation DLLs from the CustomRotations folder in the plugin's config directory, so custom rotations can be maintained separately instead of in a full fork of the plugin.\n\nEverything else is unchanged. It is rebuilt automatically from every official release, with a teal theme to tell it apart.\n\nNot affiliated with or supported by The Combat Reborn Team. Please don't report issues with this fork to them.",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/IndividualGather/RotationSolverRebornButBetter",
@@ -26,10 +26,10 @@
     "IconUrl": "https://raw.githubusercontent.com/IndividualGather/RotationSolverRebornButBetter/main/branding/Logo.png",
     "Punchline": "Analyses combat information every frame and finds the best action. Loads extra rotations from the CustomRotations config folder.",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://github.com/IndividualGather/RotationSolverRebornButBetter/releases/download/7.5.7.604/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/IndividualGather/RotationSolverRebornButBetter/releases/download/7.5.7.604/latest.zip",
-    "DownloadLinkTesting": "https://github.com/IndividualGather/RotationSolverRebornButBetter/releases/download/7.5.7.604/latest.zip",
-    "LastUpdate": 1792613373,
+    "DownloadLinkInstall": "https://github.com/IndividualGather/RotationSolverRebornButBetter/releases/download/7.5.7.704/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/IndividualGather/RotationSolverRebornButBetter/releases/download/7.5.7.704/latest.zip",
+    "DownloadLinkTesting": "https://github.com/IndividualGather/RotationSolverRebornButBetter/releases/download/7.5.7.704/latest.zip",
+    "LastUpdate": 1792867667,
     "IsHide": false,
     "IsTestingExclusive": false
   }
