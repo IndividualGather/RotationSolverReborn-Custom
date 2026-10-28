@@ -1,17 +1,16 @@
-# Applies the fork branding to an upstream checkout (run from the upstream repo root).
-# Uses exact text replacements instead of a patch so unrelated upstream edits nearby don't break it.
-# If upstream moves a file, the text is searched for in all .cs files; it fails only when the text is gone.
+# Turns an upstream RotationSolverReborn checkout into RotationSolverRebornButBetter (run from the upstream repo root).
+# Uses exact text replacements instead of patches, so unrelated upstream edits nearby don't break it.
+# If upstream moves a file, the text is searched for in all .cs files; it fails only when the text itself is gone.
 $ErrorActionPreference = 'Stop'
+$root = (Get-Location).Path   # .NET resolves relative paths against the process directory, so always build absolute paths.
 
 function Replace-Once([string]$Path, [string]$Find, [string]$Replace) {
-	# .NET resolves relative paths against the process directory, not the PowerShell location.
-	$root = (Get-Location).Path
 	$Path = Join-Path $root $Path
 	if (-not (Test-Path $Path) -or -not ([IO.File]::ReadAllText($Path).Contains($Find))) {
 		$found = @(Get-ChildItem $root -Recurse -Filter *.cs -File |
 			Where-Object { $_.FullName -notmatch '[\/](bin|obj)[\/]' -and [IO.File]::ReadAllText($_.FullName).Contains($Find) })
-		if ($found.Count -ne 1) { throw "Branding: expected exactly one file containing '$Find', found $($found.Count)" }
-		Write-Host "Branding: '$Find' moved to $($found[0].FullName)"
+		if ($found.Count -ne 1) { throw "apply-fork: expected exactly one file containing '$Find', found $($found.Count)" }
+		Write-Host "apply-fork: '$Find' moved to $($found[0].FullName)"
 		$Path = $found[0].FullName
 	}
 	$bytes = [IO.File]::ReadAllBytes($Path)
@@ -25,6 +24,15 @@ function Replace-Once([string]$Path, [string]$Find, [string]$Replace) {
 
 $nl = "`r`n"
 
+# --- Custom rotation loader: loads DLLs from pluginConfigs\RotationSolver\CustomRotations ---
+$helpers = Join-Path $root 'RotationSolver/Helpers'
+$loaderDir = if (Test-Path $helpers) { $helpers } else { Join-Path $root 'RotationSolver' }
+Copy-Item (Join-Path $PSScriptRoot 'fork-src/CustomRotationLoader.cs') $loaderDir -Force
+Replace-Once 'RotationSolver/Updaters/RotationUpdater.cs' `
+	'List<Assembly> assemblies = [typeof(RotationUpdater).Assembly];' `
+	'List<Assembly> assemblies = [typeof(RotationUpdater).Assembly, .. RotationSolver.Helpers.CustomRotationLoader.LoadAll()];'
+
+# --- Branding ---
 # Teal accent colour (upstream default: red 0xB0201F). The UI library derives every colour from it.
 # Settings are shared with the official plugin, so a saved upstream red default reads as teal too.
 Replace-Once 'RotationSolver.Basic/Configuration/Configs.cs' `
@@ -44,6 +52,6 @@ Replace-Once 'RotationSolver/Data/UiString.cs' `
 	'[Description("RotationSolverRebornButBetter Settings v")]'
 
 # In-game logo (embedded resource).
-Copy-Item (Join-Path $PSScriptRoot 'Logo.png') (Join-Path (Get-Location).Path 'Images/Logo.png') -Force
+Copy-Item (Join-Path $PSScriptRoot 'branding/Logo.png') (Join-Path $root 'Images/Logo.png') -Force
 
-Write-Host 'Branding applied.'
+Write-Host 'Fork changes applied.'

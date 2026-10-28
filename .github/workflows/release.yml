@@ -1,13 +1,13 @@
 name: Build patched RotationSolver
 
-# Builds the latest upstream release tag with patches/*.patch applied, publishes it as a
+# Builds the latest upstream release tag with apply-fork.ps1 applied (custom rotation loader + branding), publishes it as a
 # GitHub release and updates repo.json (the Dalamud custom plugin repository).
 on:
   schedule:
     - cron: '17 */4 * * *'
   push:
     branches: [main]
-    paths: ['patches/**', 'branding/**', 'PATCH_REVISION', '.github/workflows/**']
+    paths: ['apply-fork.ps1', 'fork-src/**', 'branding/**', 'PATCH_REVISION', '.github/workflows/**']
   workflow_dispatch:
     inputs:
       force:
@@ -57,23 +57,13 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
           "skip=$($skip.ToString().ToLower())" >> $env:GITHUB_OUTPUT
 
-      - name: Checkout upstream and apply patches
+      - name: Checkout upstream and apply fork changes
         if: steps.version.outputs.skip != 'true'
         shell: pwsh
         run: |
-          git clone --filter=blob:none --branch ${{ steps.version.outputs.tag }} $env:UPSTREAM upstream
+          git clone --depth 1 --branch ${{ steps.version.outputs.tag }} $env:UPSTREAM upstream
           cd upstream
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          $patches = Get-ChildItem ../fork/patches/*.patch | Sort-Object Name | ForEach-Object FullName
-          # The clone is blobless; fetch the patches' base blobs so git am can fall back to a 3-way merge.
-          foreach ($blob in (Select-String -Path $patches -Pattern '^index ([0-9a-f]+)\.\.' | ForEach-Object { $_.Matches[0].Groups[1].Value })) {
-            git cat-file -p $blob *> $null
-          }
-          $global:LASTEXITCODE = 0
-          git am --3way $patches
-          if ($LASTEXITCODE -ne 0) { throw "Patches no longer apply to upstream ${{ steps.version.outputs.tag }}" }
-          ../fork/branding/apply-branding.ps1
+          ../fork/apply-fork.ps1
 
       - name: Set up .NET
         if: steps.version.outputs.skip != 'true'
